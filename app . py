@@ -3,11 +3,14 @@ import numpy as np
 import pickle
 
 # Load the trained model
-with open("rf_model.pkl", "rb") as model_file:
-    model = pickle.load(model_file)
+try:
+    with open("rf_model.pkl", "rb") as model_file:
+        model = pickle.load(model_file)
+except FileNotFoundError:
+    st.error("Model file not found. Please upload `rf_model.pkl`.")
 
 # Streamlit UI
-st.title("AI-Based Construction Cost Estimator")
+st.title("🏗️ AI-Based Construction Cost Estimator")
 
 # User Inputs
 material_cost = st.number_input("Material Cost ($)", min_value=0, step=1000)
@@ -18,6 +21,9 @@ policy_reason_encoded = st.number_input("Policy Reason (Encoded)", min_value=0, 
 
 # Prediction Button
 if st.button("Estimate Cost"):
-    input_data = np.array([[material_cost, labor_cost, profit_rate, discount_or_markup, policy_reason_encoded]])
-    prediction = model.predict(input_data)[0]
-    st.success(f"Estimated Total Cost: ${prediction:,.2f}")
+    if model:
+        input_data = np.array([[material_cost, labor_cost, profit_rate, discount_or_markup, policy_reason_encoded]])
+        prediction = model.predict(input_data)[0]
+        st.success(f"💰 Estimated Total Cost: ${prediction:,.2f}")
+    else:
+        st.error("Model is not loaded. Please check `rf_model.pkl`.")
